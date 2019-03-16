@@ -3,6 +3,7 @@ import base64  # for encoding the script for variable
 import os
 import re
 import json
+import build
 from flask import Flask, flash, render_template, request, redirect, url_for, send_from_directory
 from werkzeug import secure_filename
 
@@ -12,14 +13,15 @@ app = Flask(__name__)
 @app.route("/", methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        email = request.form['email']
-        TRAVIS_TAG = request.form['TRAVIS_TAG']
-        event_url = request.form['event_url']
-        with open('travis_script_1.sh', 'rb') as f:
-            os.environ["TRAVIS_SCRIPT"] = str(base64.b64encode(f.read()))[1:]
-        return redirect(url_for('output'))
-    return render_template('index.html')
+        os.environ['query'] = 'nepalearthquake'
+        os.environ['languagecode'] = 'en'
+        build.send_trigger_request(os.environ['query'], os.environ['languagecode'])
+    return redirect(url_for('output'))
 
+
+@app.route("/output")
+def output():
+    return render_template('build.html')
 
 # Return a custom 404 error.
 @app.errorhandler(404)
